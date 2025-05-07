@@ -6,14 +6,12 @@ import { storage } from '../../config/firebaseConfig';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Navbar from '../common/Navbar';
 import { useToast } from '../common/Toast';
+import Footer from '../common/Footer';
 
 // Import components
 import ProfileHeader from './components/ProfileHeader';
 import AboutSection from './components/AboutSection';
-import PostsTab from './components/PostsTab';
 import FollowModal from './components/FollowModal';
-import PostCreationModal from './components/PostCreationModal';
-import SharePostModal from '../common/SharePostModal';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -23,7 +21,6 @@ const Profile = () => {
   const [user, setUser] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const [isCurrentUserProfile, setIsCurrentUserProfile] = useState(true);
-  const [activeTab, setActiveTab] = useState('posts');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
     firstName: '',
@@ -44,72 +41,6 @@ const Profile = () => {
   const [showFollowingModal, setShowFollowingModal] = useState(false);
   const [followData, setFollowData] = useState([]);
   const [isLoadingFollowData, setIsLoadingFollowData] = useState(false);
-
-  // Post state
-  const [showPostModal, setShowPostModal] = useState(false);
-  const [postContent, setPostContent] = useState('');
-  const [postMedia, setPostMedia] = useState(null);
-  const [postMediaPreview, setPostMediaPreview] = useState(null);
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
-  const [posts, setPosts] = useState([]);
-  const [isLoadingPosts, setIsLoadingPosts] = useState(false);
-  const postFileInputRef = useRef(null);
-
-  // Shared post state
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [postToShare, setPostToShare] = useState(null);
-
-  // Add this like post handler function
-  const handleLikePost = async (postId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/posts/${postId}/like`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to like post');
-      }
-
-      const data = await response.json();
-      
-      // Update post likes in state
-      setPosts(prevPosts => 
-        prevPosts.map(post => 
-          post.id === postId 
-            ? { 
-                ...post, 
-                likes: data.liked 
-                  ? [...(post.likes || []), currentUser.id] 
-                  : (post.likes || []).filter(id => id !== currentUser.id)
-              } 
-            : post
-        )
-      );
-      
-      addToast(data.liked ? 'Post liked!' : 'Post unliked!', 'success');
-    } catch (error) {
-      console.error('Error liking post:', error);
-      addToast('Failed to like post', 'error');
-    }
-  };
-
-  const handleSharePost = (post) => {
-    setPostToShare(post);
-    setShowShareModal(true);
-  };
-
-  // Add this handler to update posts when comments are added
-  const handlePostUpdated = (updatedPost) => {
-    setPosts(prevPosts => 
-      prevPosts.map(post => 
-        post.id === updatedPost.id ? updatedPost : post
-      )
-    );
-  };
 
   // Fetch profile data - either current user or another user
   useEffect(() => {
@@ -186,41 +117,6 @@ const Profile = () => {
 
   }, [navigate, userId, addToast]);
 
-  useEffect(() => {
-    if (user) {
-      fetchUserPosts();
-    }
-  }, [user]);
-
-  const fetchUserPosts = async () => {
-    if (!user) return;
-
-    setIsLoadingPosts(true);
-    try {
-      const token = localStorage.getItem('token');
-      const profileId = userId || (currentUser ? currentUser.id : null);
-
-      if (!profileId) return;
-
-      const response = await fetch(`${API_BASE_URL}/posts/user/${profileId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch posts');
-      }
-
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error('Error fetching posts:', error);
-      setPosts([]);
-    } finally {
-      setIsLoadingPosts(false);
-    }
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -424,90 +320,7 @@ const Profile = () => {
     }
   };
 
-  const handlePostMediaChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setPostMedia(file);
-      const previewUrl = URL.createObjectURL(file);
-      setPostMediaPreview(previewUrl);
-    }
-  };
 
-  const handleCreatePost = async (e) => {
-    e.preventDefault();
-
-    if (!postContent.trim() && !postMedia) {
-      addToast('Please add some content or media to your post', 'error');
-      return;
-    }
-
-    setIsSubmittingPost(true);
-
-    try {
-      const token = localStorage.getItem('token');
-
-      let mediaUrl = null;
-      if (postMedia) {
-        const mediaName = `post_${user.id}_${Date.now()}_${postMedia.name}`;
-        const storageRef = ref(storage, `postMedia/${mediaName}`);
-
-        await uploadBytes(storageRef, postMedia);
-        mediaUrl = await getDownloadURL(storageRef);
-      }
-
-      const postData = {
-        content: postContent,
-        mediaUrl: mediaUrl,
-        mediaType: postMedia ? (postMedia.type.startsWith('image') ? 'IMAGE' : 'VIDEO') : null
-      };
-
-      const response = await fetch(`${API_BASE_URL}/posts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(postData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to create post');
-      }
-
-      const newPost = await response.json();
-
-      setPosts(prevPosts => [newPost, ...prevPosts]);
-
-      setPostContent('');
-      setPostMedia(null);
-      setPostMediaPreview(null);
-      setShowPostModal(false);
-
-      addToast('Post created successfully!', 'success');
-    } catch (error) {
-      console.error('Error creating post:', error);
-      addToast('Failed to create post. Please try again.', 'error');
-    } finally {
-      setIsSubmittingPost(false);
-    }
-  };
-
-  const formatPostDate = (dateString) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHour = Math.floor(diffMin / 60);
-    const diffDay = Math.floor(diffHour / 24);
-
-    if (diffSec < 60) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    if (diffHour < 24) return `${diffHour}h ago`;
-    if (diffDay < 7) return `${diffDay}d ago`;
-
-    return date.toLocaleDateString();
-  };
 
   if (isLoading) {
     return (
@@ -577,88 +390,7 @@ const Profile = () => {
             fileInputRef={fileInputRef}
           />
         </div>
-
-        {/* Main Content Area */}
-        <div className="md:col-span-2">
-          {/* Tabs */}
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="border-b border-gray-200">
-              <nav className="flex">
-                <button
-                  onClick={() => setActiveTab('posts')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm flex items-center ${activeTab === 'posts'
-                      ? 'border-DarkColor text-DarkColor'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <i className='bx bx-message-square-detail mr-2 text-lg'></i>
-                  Posts
-                </button>
-                <button
-                  onClick={() => setActiveTab('learning')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm flex items-center ${activeTab === 'learning'
-                      ? 'border-DarkColor text-DarkColor'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <i className='bx bx-book-open mr-2 text-lg'></i>
-                  Learning
-                </button>
-                <button
-                  onClick={() => setActiveTab('achievements')}
-                  className={`py-4 px-6 text-center border-b-2 font-medium text-sm flex items-center ${activeTab === 'achievements'
-                      ? 'border-DarkColor text-DarkColor'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                    }`}
-                >
-                  <i className='bx bx-trophy mr-2 text-lg'></i>
-                  Achievements
-                </button>
-              </nav>
-            </div>
-
-            {/* Tab Content */}
-            <div className="p-6">
-              {activeTab === 'posts' && (
-                <PostsTab
-                  isCurrentUserProfile={isCurrentUserProfile}
-                  user={user}
-                  currentUser={currentUser}
-                  setShowPostModal={setShowPostModal}
-                  postFileInputRef={postFileInputRef}
-                  isLoadingPosts={isLoadingPosts}
-                  posts={posts}
-                  setPosts={setPosts}
-                  formatPostDate={formatPostDate}
-                  handleLikePost={handleLikePost}
-                  handleSharePost={handleSharePost}
-                  handlePostUpdated={handlePostUpdated}
-                />
-              )}
-
-              {activeTab === 'learning' && <LearningTab />}
-
-              {activeTab === 'achievements' && <AchievementsTab />}
-            </div>
-          </div>
-        </div>
       </div>
-
-      {/* Post Creation Modal */}
-      <PostCreationModal
-        isOpen={showPostModal}
-        onClose={() => setShowPostModal(false)}
-        user={user}
-        postContent={postContent}
-        setPostContent={setPostContent}
-        postMedia={postMedia}
-        postMediaPreview={postMediaPreview}
-        setPostMedia={setPostMedia}
-        setPostMediaPreview={setPostMediaPreview}
-        isSubmittingPost={isSubmittingPost}
-        handleCreatePost={handleCreatePost}
-        postFileInputRef={postFileInputRef}
-      />
 
       {/* Followers Modal */}
       <FollowModal
@@ -680,22 +412,7 @@ const Profile = () => {
         onFollowToggle={handleFollowToggle}
       />
 
-      {/* Share Post Modal */}
-      <SharePostModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        post={postToShare}
-        currentUser={currentUser}
-      />
-
-      {/* Footer */}
-      <footer className="bg-white mt-12 py-6 border-t">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 text-sm">
-            © 2025 SkillShare Platform. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

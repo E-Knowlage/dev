@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import DefaultCover from '../../../assets/p.png';
+import DefaultCover from '../../../assets/p.jpg';
 import DefaultAvatar from '../../../assets/avatar.png';
 
 const ProfileHeader = ({ 
@@ -74,8 +74,11 @@ const ProfileHeader = ({
                   ? `${user.firstName} ${user.lastName}`
                   : user.firstName || user.lastName || user.username}
               </h1>
-              <span className="sm:ml-4 px-3 py-1 text-xs inline-flex items-center rounded-full bg-DarkColor text-white font-medium">
+              {/* <span className="sm:ml-4 px-3 py-1 text-xs inline-flex items-center rounded-full bg-DarkColor text-white font-medium">
                 {user.role}
+              </span> */}
+              <span className="sm:ml-4 px-3 py-1 text-xs inline-flex items-center rounded-full bg-DarkColor text-white font-medium">
+                {user.followers <=  10 ? '😁' : user.followers <= 20 ? '😎' : user.followers <= 30 ? '🤩' : user.followers === 40 ? '🥳' : user.followers === 50 ? '🤗' : user.followers === 60 ? '😇' : user.followers === 70 ? '😏' : user.followers === 80 ? '😋' : user.followers === 90 ? '😜' : user.followers === 100 ? '🤪' : ''}
               </span>
             </div>
             <p className="text-gray-600 mt-1 text-sm flex items-center">
@@ -124,7 +127,7 @@ const ProfileHeader = ({
                 )}
                 <button
                   onClick={handleLogout}
-                  className="px-4 py-2 bg-DarkColor text-white rounded-lg hover:bg-ExtraDarkColor transition-colors shadow-sm flex items-center"
+                  className="px-4 py-2 bg-[#fff200] text-black rounded-lg hover:bg-[#ffce00] transition-colors shadow-sm flex items-center"
                 >
                   <i className='bx bx-log-out mr-1'></i> Logout
                 </button>
@@ -135,18 +138,12 @@ const ProfileHeader = ({
                 <button
                   onClick={handleFollowAction}
                   className={`px-4 py-2 ${user?.isFollowing
-                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      : 'bg-DarkColor text-white hover:bg-ExtraDarkColor'
+                      ? 'bg-[#fff200] text-black hover:bg-[#ffce00]'
+                      : 'bg-[#fff200] text-black hover:bg-[#ffce00]'
                     } rounded-lg transition-colors shadow-sm flex items-center`}
                 >
                   <i className={`bx ${user?.isFollowing ? 'bx-user-minus' : 'bx-user-plus'} mr-1`}></i>
                   {user?.isFollowing ? 'Unfollow' : 'Follow'}
-                </button>
-                <button
-                  onClick={() => navigate(`/messages/${user.id}`)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors shadow-sm flex items-center"
-                >
-                  <i className='bx bx-message-square-detail mr-1'></i> Message
                 </button>
               </>
             )}
