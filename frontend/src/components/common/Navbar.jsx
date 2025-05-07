@@ -195,7 +195,7 @@ const Navbar = ({ user }) => {
               <div className="relative">
                 <input
                   type="text"
-                  className="bg-gray-100 px-4 py-2 pr-10 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-DarkColor focus:bg-white transition-colors"
+                  className="bg-white px-4 py-2 pr-10 rounded-full w-64 focus:outline-none focus:ring-2 focus:ring-DarkColor focus:bg-white transition-colors"
                   placeholder="Search for users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -262,15 +262,6 @@ const Navbar = ({ user }) => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <button 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
-              onClick={() => navigate('/dashboard')}
-              title="Dashboard"
-            >
-              <i className='bx bxs-home text-xl text-white'></i>
-            </button>
-            
-            
             <div className="relative ml-3">
               <div>
                 <button 
