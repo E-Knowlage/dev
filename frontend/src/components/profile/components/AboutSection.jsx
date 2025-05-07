@@ -16,7 +16,7 @@ const AboutSection = ({
   fileInputRef
 }) => {
   return (
-    <div className="bg-white shadow-md rounded-lg p-6">
+    <div className="bg-white shadow-md rounded-lg p-6 ">
       <h2 className="text-lg font-semibold text-ExtraDarkColor mb-4 flex items-center">
         <i className='bx bx-user-circle mr-2'></i>About
       </h2>
