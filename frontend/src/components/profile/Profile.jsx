@@ -11,8 +11,6 @@ import { useToast } from '../common/Toast';
 import ProfileHeader from './components/ProfileHeader';
 import AboutSection from './components/AboutSection';
 import PostsTab from './components/PostsTab';
-import LearningTab from './components/LearningTab';
-import AchievementsTab from './components/AchievementsTab';
 import FollowModal from './components/FollowModal';
 import PostCreationModal from './components/PostCreationModal';
 import SharePostModal from '../common/SharePostModal';
