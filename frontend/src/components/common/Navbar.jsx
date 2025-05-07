@@ -19,9 +19,6 @@ const Navbar = ({ user }) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setShowResults(false);
       }
-      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
-        setShowNotifications(false);
-      }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
