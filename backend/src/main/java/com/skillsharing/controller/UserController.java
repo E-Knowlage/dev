@@ -34,7 +34,6 @@ public class UserController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    private final NotificationRepository notificationRepository;  // Add this field
 
     @GetMapping("/profile")
     public ResponseEntity<?> getUserProfile() {
@@ -247,35 +246,6 @@ public class UserController {
         targetUser.getFollowers().add(currentUser.getId());
         userRepository.save(targetUser);
         
-        // Create the notification with full name
-        try {
-            Notification notification = new Notification();
-            notification.setUserId(targetUser.getId());
-            notification.setSenderId(currentUser.getId());
-            notification.setSenderUsername(currentUser.getUsername());
-            notification.setSenderProfilePicture(currentUser.getProfilePicture());
-            notification.setType("FOLLOW");
-            
-            // Use full name in the notification message
-            String fullName = currentUser.getFirstName() != null && currentUser.getLastName() != null
-                ? currentUser.getFirstName() + " " + currentUser.getLastName()
-                : currentUser.getFirstName() != null
-                    ? currentUser.getFirstName() 
-                    : currentUser.getLastName() != null 
-                        ? currentUser.getLastName() 
-                        : currentUser.getUsername();
-            
-            notification.setMessage(fullName + " started following you");
-            notification.setRead(false);
-            notification.setCreatedAt(LocalDateTime.now());
-            
-            notificationRepository.save(notification);
-            logger.info("Created follow notification for user: {}", targetUser.getId());
-        } catch (Exception e) {
-            logger.error("Failed to create notification", e);
-            // Continue with the follow operation even if notification creation fails
-        }
-        
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("message", "Now following " + targetUser.getUsername());
@@ -412,109 +382,8 @@ public class UserController {
             
         return ResponseEntity.ok(dtos);
     }
-    
-    // Get user's notifications
-    @GetMapping("/notifications")
-    public ResponseEntity<List<Notification>> getNotifications() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        
-        Optional<User> currentUserOpt = userRepository.findByEmail(currentUserEmail);
-        if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        User currentUser = currentUserOpt.get();
-        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getId());
-        
-        return ResponseEntity.ok(notifications);
-    }
-    
-    // Get unread notification count
-    @GetMapping("/notifications/count")
-    public ResponseEntity<Map<String, Long>> getUnreadNotificationCount() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        
-        Optional<User> currentUserOpt = userRepository.findByEmail(currentUserEmail);
-        if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        User currentUser = currentUserOpt.get();
-        long count = notificationRepository.countByUserIdAndRead(currentUser.getId(), false);
-        
-        Map<String, Long> response = new HashMap<>();
-        response.put("count", count);
-        
-        return ResponseEntity.ok(response);
-    }
-    
-    // Mark notifications as read
-    @PostMapping("/notifications/mark-read")
-    public ResponseEntity<?> markNotificationsAsRead(@RequestBody List<String> notificationIds) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        
-        Optional<User> currentUserOpt = userRepository.findByEmail(currentUserEmail);
-        if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        User currentUser = currentUserOpt.get();
-        
-        List<Notification> notifications = notificationRepository.findAllById(notificationIds);
-        for (Notification notification : notifications) {
-            // Only allow marking notifications as read if they belong to the current user
-            if (notification.getUserId().equals(currentUser.getId())) {
-                notification.setRead(true);
-                notificationRepository.save(notification);
-            }
-        }
-        
-        return ResponseEntity.ok().build();
-    }
-    
-    // Mark all notifications as read
-    @PostMapping("/notifications/mark-all-read")
-    public ResponseEntity<?> markAllNotificationsAsRead() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        
-        Optional<User> currentUserOpt = userRepository.findByEmail(currentUserEmail);
-        if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        User currentUser = currentUserOpt.get();
-        
-        List<Notification> notifications = notificationRepository.findByUserIdAndReadOrderByCreatedAtDesc(currentUser.getId(), false);
-        for (Notification notification : notifications) {
-            notification.setRead(true);
-            notificationRepository.save(notification);
-        }
-        
-        return ResponseEntity.ok().build();
-    }
-    
-    // Clear all notifications
-    @DeleteMapping("/notifications/clear-all")
-    public ResponseEntity<?> clearAllNotifications() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
-        
-        Optional<User> currentUserOpt = userRepository.findByEmail(currentUserEmail);
-        if (currentUserOpt.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        User currentUser = currentUserOpt.get();
-        
-        List<Notification> notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(currentUser.getId());
-        notificationRepository.deleteAll(notifications);
-        
-        return ResponseEntity.ok().build();
-    }
+
+
     
     // Add this new endpoint to get a user by ID
     @GetMapping("/{userId}")
