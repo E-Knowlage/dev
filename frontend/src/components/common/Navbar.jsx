@@ -3,26 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import 'boxicons/css/boxicons.min.css';
 import DefaultAvatar from '../../assets/avatar.png';
 import { API_BASE_URL } from '../../config/apiConfig';
-import { useToast } from '../common/Toast';
 
 const Navbar = ({ user }) => {
   const navigate = useNavigate();
-  const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const searchRef = useRef(null);
   
-  // Notification state
-  const [notifications, setNotifications] = useState([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [isLoadingNotifications, setIsLoadingNotifications] = useState(false);
-  const notificationRef = useRef(null);
-
-  // Add state for message count
-  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -39,191 +28,7 @@ const Navbar = ({ user }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  // Fetch notifications and count
-  useEffect(() => {
-    const fetchUnreadCounts = async () => {
-      if (!user) return;
-      
-      try {
-        const token = localStorage.getItem('token');
-        
-        // Fetch notification count
-        const notifResponse = await fetch(`${API_BASE_URL}/users/notifications/count`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (notifResponse.ok) {
-          const notifData = await notifResponse.json();
-          setUnreadCount(notifData.count);
-        }
-        
-        // Fetch message count
-        const msgResponse = await fetch(`${API_BASE_URL}/messages/unread-count`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (msgResponse.ok) {
-          const msgData = await msgResponse.json();
-          setUnreadMessageCount(msgData.count);
-        }
-      } catch (error) {
-        console.error('Error fetching unread counts:', error);
-      }
-    };
-    
-    fetchUnreadCounts();
-    
-    // Poll for updates
-    const intervalId = setInterval(fetchUnreadCounts, 30000);
-    
-    return () => clearInterval(intervalId);
-  }, [user]);
   
-  // Fetch notifications when dropdown is opened
-  const fetchNotifications = async () => {
-    if (!user) return;
-    
-    setIsLoadingNotifications(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/users/notifications`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setNotifications(data);
-      }
-    } catch (error) {
-      console.error('Error fetching notifications:', error);
-    } finally {
-      setIsLoadingNotifications(false);
-    }
-  };
-  
-  // Toggle notifications dropdown
-  const toggleNotifications = () => {
-    if (!showNotifications) {
-      fetchNotifications();
-    }
-    setShowNotifications(!showNotifications);
-  };
-  
-  // Mark notification as read
-  const markAsRead = async (notificationId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/users/notifications/mark-read`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify([notificationId])
-      });
-      
-      if (response.ok) {
-        // Update local state
-        setNotifications(prev => 
-          prev.map(notification => 
-            notification.id === notificationId 
-              ? { ...notification, read: true } 
-              : notification
-          )
-        );
-        
-        // Update unread count
-        setUnreadCount(prev => Math.max(0, prev - 1));
-      }
-    } catch (error) {
-      console.error('Error marking notification as read:', error);
-      addToast('Failed to mark notification as read', 'error');
-    }
-  };
-  
-  // Mark all notifications as read
-  const markAllAsRead = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/users/notifications/mark-all-read`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        // Update local state
-        setNotifications(prev => 
-          prev.map(notification => ({ ...notification, read: true }))
-        );
-        
-        // Reset unread count
-        setUnreadCount(0);
-        addToast('All notifications marked as read', 'success');
-      }
-    } catch (error) {
-      console.error('Error marking all notifications as read:', error);
-      addToast('Failed to mark all notifications as read', 'error');
-    }
-  };
-  
-  // Clear all notifications
-  const clearAllNotifications = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/users/notifications/clear-all`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (response.ok) {
-        // Clear notifications and reset count
-        setNotifications([]);
-        setUnreadCount(0);
-        addToast('All notifications cleared', 'success');
-      }
-    } catch (error) {
-      console.error('Error clearing all notifications:', error);
-      addToast('Failed to clear notifications', 'error');
-    }
-  };
-  
-  // Handle notification click (navigate to relevant page)
-  const handleNotificationClick = (notification) => {
-    // Mark as read
-    if (!notification.read) {
-      markAsRead(notification.id);
-    }
-    
-    // Navigate based on notification type
-    switch (notification.type) {
-      case 'FOLLOW':
-        // Navigate to follower's profile
-        navigate(`/profile/${notification.senderId}`);
-        break;
-      case 'LIKE':
-      case 'COMMENT':
-      case 'SHARE':
-        // Navigate to the post
-        navigate(`/post/${notification.resourceId}`);
-        break;
-      default:
-        // Default behavior - just close the dropdown
-        break;
-    }
-    
-    setShowNotifications(false);
-  };
-
   // Add a method to refresh search results with current follow status
   const refreshSearch = async (query) => {
     setIsSearching(true);
@@ -320,13 +125,6 @@ const Navbar = ({ user }) => {
         throw new Error(errorData.message || `Failed to ${endpoint} user`);
       }
       
-      // Show success message
-      addToast(
-        originalFollowState 
-          ? 'Successfully unfollowed user' 
-          : 'Successfully followed user', 
-        'success'
-      );
       
       // After a small delay, refresh the search results to ensure consistency with backend
       setTimeout(async () => {
@@ -361,25 +159,7 @@ const Navbar = ({ user }) => {
     }
   };
 
-  // Format notification time
-  const formatTime = (dateTime) => {
-    if (!dateTime) return '';
-    
-    const date = new Date(dateTime);
-    const now = new Date();
-    const diffMs = now - date;
-    const diffSec = Math.floor(diffMs / 1000);
-    const diffMin = Math.floor(diffSec / 60);
-    const diffHour = Math.floor(diffMin / 60);
-    const diffDay = Math.floor(diffHour / 24);
-    
-    if (diffSec < 60) return 'just now';
-    if (diffMin < 60) return `${diffMin}m ago`;
-    if (diffHour < 24) return `${diffHour}h ago`;
-    if (diffDay < 7) return `${diffDay}d ago`;
-    
-    return date.toLocaleDateString();
-  };
+  
 
   // Ensure focus events also trigger a refresh of search results
   const handleSearchFocus = () => {
@@ -399,15 +179,15 @@ const Navbar = ({ user }) => {
   }, [user]); // This will run when the user object changes (like after login/refresh)
 
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
+    <nav className="bg-[#0046be] shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
             <span 
-              className="text-ExtraDarkColor text-xl font-bold cursor-pointer mr-6"
+              className="text-white text-xl font-bold cursor-pointer mr-6"
               onClick={() => navigate('/dashboard')}
             >
-              SkillShare
+              E-Knowlage
             </span>
             
             {/* Search Bar */}
@@ -487,121 +267,19 @@ const Navbar = ({ user }) => {
               onClick={() => navigate('/dashboard')}
               title="Dashboard"
             >
-              <i className='bx bxs-home text-xl text-DarkColor'></i>
+              <i className='bx bxs-home text-xl text-white'></i>
             </button>
             
-            {/* Notification Bell */}
-            <div className="relative" ref={notificationRef}>
-              <button 
-                className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-                onClick={toggleNotifications}
-                title="Notifications"
-              >
-                <i className='bx bx-bell text-xl text-DarkColor'></i>
-                {unreadCount > 0 && (
-                  <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
-                )}
-              </button>
-              
-              {/* Notifications Dropdown */}
-              {showNotifications && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg overflow-hidden z-50">
-                  <div className="flex justify-between items-center p-3 border-b border-gray-100">
-                    <h3 className="font-semibold text-gray-700">Notifications</h3>
-                    <div className="flex space-x-2">
-                      <button 
-                        onClick={markAllAsRead} 
-                        className="text-xs text-blue-600 hover:text-blue-800"
-                        title="Mark all as read"
-                      >
-                        Mark all read
-                      </button>
-                      <button 
-                        onClick={clearAllNotifications} 
-                        className="text-xs text-red-600 hover:text-red-800"
-                        title="Clear all notifications"
-                      >
-                        Clear all
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="max-h-96 overflow-y-auto">
-                    {isLoadingNotifications ? (
-                      <div className="flex justify-center items-center p-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-gray-500 border-t-DarkColor"></div>
-                      </div>
-                    ) : notifications.length > 0 ? (
-                      <ul>
-                        {notifications.map(notification => (
-                          <li 
-                            key={notification.id} 
-                            className={`border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${!notification.read ? 'bg-blue-50' : ''}`}
-                            onClick={() => handleNotificationClick(notification)}
-                          >
-                            <div className="flex p-3">
-                              <img 
-                                src={notification.senderProfilePicture || DefaultAvatar} 
-                                alt={notification.senderUsername}
-                                className="h-10 w-10 rounded-full object-cover"
-                              />
-                              <div className="ml-3 flex-1">
-                                <div className="flex justify-between">
-                                  <p className="text-sm text-gray-800">
-                                    <span className="font-medium">{notification.message}</span>
-                                  </p>
-                                  <span className="text-xs text-gray-500">{formatTime(notification.createdAt)}</span>
-                                </div>
-                                {!notification.read && (
-                                  <button 
-                                    className="text-xs text-blue-600 hover:text-blue-800 mt-1"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      markAsRead(notification.id);
-                                    }}
-                                  >
-                                    Mark as read
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <div className="p-4 text-center text-gray-500">
-                        <p>No notifications</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            <button 
-              className="p-2 rounded-full hover:bg-gray-100 transition-colors relative"
-              onClick={() => navigate('/messages')}
-              title="Messages"
-            >
-              <i className='bx bx-message-square-detail text-xl text-DarkColor'></i>
-              {unreadMessageCount > 0 && (
-                <span className="absolute top-0 right-0 h-5 w-5 bg-red-500 rounded-full text-xs text-white flex items-center justify-center">
-                  {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-                </span>
-              )}
-            </button>
             
             <div className="relative ml-3">
               <div>
                 <button 
-                  className="flex text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-DarkColor"
+                  className="flex text-sm focus:outline-none"
                   onClick={() => navigate('/profile')}
                   title="Profile"
                 >
                   <img 
-                    className="h-8 w-8 rounded-full object-cover border-2 border-DarkColor"
+                    className="h-8 w-8 rounded-full object-cover border-2 border-white"
                     src={user?.profilePicture || DefaultAvatar} 
                     alt={user?.username || 'User'}
                   />

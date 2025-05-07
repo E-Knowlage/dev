@@ -22,8 +22,7 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 
 // Add these imports
-import com.skillsharing.model.Notification;
-import com.skillsharing.repository.NotificationRepository;
+
 import java.time.LocalDateTime;
 
 @RestController
