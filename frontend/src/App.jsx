@@ -4,7 +4,6 @@ import Auth from './components/auth/Auth';
 import Profile from './components/profile/Profile';
 import Dashboard from './components/dashboard/Dashboard';
 import { ToastProvider } from './components/common/Toast';
-import SinglePostView from './components/post/SinglePostView';
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} /> {/* Current user profile */}
           <Route path="/profile/:userId" element={<Profile />} /> {/* Add this route for viewing other users */}
-          <Route path="/post/:postId" element={<SinglePostView />} />
           <Route path="/" element={<Navigate to="/auth" replace />} />
         </Routes>
       </Router>
