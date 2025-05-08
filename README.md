@@ -1,4 +1,4 @@
-# Skill Sharing & Learning Platform
+# E-knowlage
 
 A modern web application that facilitates knowledge exchange and learning in the developer community.
 
@@ -10,7 +10,7 @@ A modern web application that facilitates knowledge exchange and learning in the
    - CRUD operations
 
 2. **User Management & Learning Progress**
-   - User roles (beginner, professional, mentor)
+   - User Achivments
    - Learning plans and progress tracking
    - Profile management
 
