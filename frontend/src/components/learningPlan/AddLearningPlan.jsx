@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useLocation,useNavigate } from 'react-router-dom';
 import './css/AddLearningPlan.css';
+import Navbar from '../common/Navbar';
+import Footer from '../common/Footer';
 
 function AddLearningPlan({ onSave}) {
   const navigate = useNavigate();
@@ -76,7 +78,8 @@ function AddLearningPlan({ onSave}) {
   };
 
   return (
-    
+    <div>
+      <Navbar/>    
     <div className="card" style={{ padding: '2rem', maxWidth: '600px', margin: 'auto' }}>
       <h2>Create New Plan</h2>
       <form onSubmit={handleSubmit}>
@@ -117,6 +120,8 @@ function AddLearningPlan({ onSave}) {
           <button type="button" className="go-back-btn" onClick={handleGoBack}>Go Back</button>
         </div>
       </form>
+    </div>
+    <Footer/>
     </div>
   );
 }

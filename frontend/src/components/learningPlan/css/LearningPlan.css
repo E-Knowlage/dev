@@ -45,7 +45,7 @@ h1{
 }
 
 .plan-title {
-  color: gray;
+  color: rgb(107, 106, 106);
   text-align: center;
   width: 100%;
 }
@@ -88,13 +88,34 @@ h1{
   border-radius: 5px;
 }
 
-.status-btn {
+/* .status-btn {
   background-color: #ffc107;
   border: none;
   color: black;
   padding: 5px 10px;
   border-radius: 5px;
+} */
+
+.status-btn {
+  border: none;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
+
+/* In Progress: green */
+.status-btn.in-progress {
+  background-color: #dc3545;
+}
+
+/* Completed: red */
+.status-btn.completed {
+  background-color: #ffc107;
+}
+
+
 
 .icon {
   cursor: pointer;

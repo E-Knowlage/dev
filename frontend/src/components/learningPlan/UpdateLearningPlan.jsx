@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 import './css/UpdateLearningPlan.css';
+import Navbar from '../common/Navbar';
+import Footer from '../common/Footer';
 
 const UpdateLearningPlan = () => {
   const { id } = useParams();
@@ -12,7 +14,7 @@ const UpdateLearningPlan = () => {
     description: '',
     deadline: '',
     resources: '',
-    status: 'In Progress'
+    status: ''
   });
   const [error, setError] = useState(null);
 
@@ -60,6 +62,8 @@ const UpdateLearningPlan = () => {
   };
 
   return (
+    <div>
+      <Navbar/>
     <div className="update-main-container">
       <h1>Update Learning Plan</h1>
       {error && <div className="error-message">{error}</div>}
@@ -117,6 +121,8 @@ const UpdateLearningPlan = () => {
           <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
         </div>
       </form>
+    </div>
+    <Footer/>
     </div>
   );
 };

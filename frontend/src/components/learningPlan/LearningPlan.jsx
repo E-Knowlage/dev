@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaPen, FaTrash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../common/Navbar';
+import Footer from '../common/Footer';
 import './css/LearningPlan.css'
 
 const LearningPlanMain = () => {
@@ -30,6 +32,30 @@ const LearningPlanMain = () => {
     navigate('/new');
   };
 
+  // const handleStatusToggle = (id) => {
+  //   setPlans((prevPlans) =>
+  //     prevPlans.map((plan) =>
+  //       plan.id === id
+  //         ? {
+  //             ...plan,
+  //             status: plan.status === 'In Progress' ? 'Completed' : 'In Progress',
+  //           }
+  //         : plan
+  //     )
+  //   );
+  // };
+
+  const handleStatusToggle = (id) => {
+    setPlans((prevPlans) =>
+      prevPlans.map((plan) => {
+        if (plan.id !== id) return plan;
+  
+        const nextStatus = plan.status === 'In Progress' ? 'Completed' : 'In Progress';
+        return { ...plan, status: nextStatus };
+      })
+    );
+  };
+  
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
     try {
@@ -45,7 +71,9 @@ const LearningPlanMain = () => {
   };
  
   return (
-    <div className="main-container">
+    <div>
+      <Navbar/>
+      <div className="main-container">
       <div className="header-section">
         <h1>Learning Plan</h1>
         <button className="new-plan-btn" onClick={handleNewPlan}>New Plan</button>
@@ -71,8 +99,15 @@ const LearningPlanMain = () => {
               <div>{plan.topic}</div>
               <div>{plan.description || '-'}</div>
               <div>{plan.deadline}</div>
-              <div><button className="view-btn">View</button></div>
-              <div><button className="status-btn">In Progress</button></div>
+              <div><button className="view-btn" onClick={() => plan.id && navigate(`/resources/${plan.id}`)}>View</button></div>
+              {/* <div><button className="status-btn">In Progress</button></div> */}
+              <div>
+                <button
+                className={`status-btn ${plan.status === 'Completed' ? 'completed' : 'in-progress'}`}
+                onClick={() => handleStatusToggle(plan.id)}>
+                {plan.status}
+                </button>
+            </div>
               <div className='btn-container'>
                 <FaPen className="icon" onClick={() => navigate(`/edit/${plan.id}`)}/>
                 <FaTrash className="icon" onClick={() => handleDelete(plan.id)} />
@@ -81,6 +116,8 @@ const LearningPlanMain = () => {
           </div>
         </div>
       ))}
+    </div>
+    <Footer/>
     </div>
   );
 };
