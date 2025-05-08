@@ -74,12 +74,6 @@ const ProfileHeader = ({
                   ? `${user.firstName} ${user.lastName}`
                   : user.firstName || user.lastName || user.username}
               </h1>
-              {/* <span className="sm:ml-4 px-3 py-1 text-xs inline-flex items-center rounded-full bg-DarkColor text-white font-medium">
-                {user.role}
-              </span> */}
-              <span className="sm:ml-4 px-3 py-1 text-xs inline-flex items-center rounded-full bg-DarkColor text-white font-medium">
-                {user.followers <=  10 ? '😁' : user.followers <= 20 ? '😎' : user.followers <= 30 ? '🤩' : user.followers === 40 ? '🥳' : user.followers === 50 ? '🤗' : user.followers === 60 ? '😇' : user.followers === 70 ? '😏' : user.followers === 80 ? '😋' : user.followers === 90 ? '😜' : user.followers === 100 ? '🤪' : ''}
-              </span>
             </div>
             <p className="text-gray-600 mt-1 text-sm flex items-center">
               <i className='bx bx-user mr-1'></i> @{user.username}
@@ -113,14 +107,14 @@ const ProfileHeader = ({
                 {isEditing ? (
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm"
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-[#e81e25] hover:border-[#e81e25] transition-colors shadow-sm"
                   >
                     Cancel
                   </button>
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors shadow-sm flex items-center"
+                    className="px-4 py-2 border border-gray-300 rounded-lg text-[#0046be] hover:border-[#0046be] transition-colors shadow-sm flex items-center"
                   >
                     <i className='bx bx-edit mr-1'></i> Edit Profile
                   </button>
