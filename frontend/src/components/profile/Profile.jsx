@@ -7,6 +7,12 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import Navbar from '../common/Navbar';
 import { useToast } from '../common/Toast';
 import Footer from '../common/Footer';
+import Follow1 from '../../assets/Follower1.png';
+import Follow2 from '../../assets/Follower2.png';
+import Follow3 from '../../assets/Follower3.png';
+import Following1 from '../../assets/Following1.png';
+import Following2 from '../../assets/Following2.png';
+import Post1 from '../../assets/Post1.png';
 
 // Import components
 import ProfileHeader from './components/ProfileHeader';
@@ -389,6 +395,50 @@ const Profile = () => {
             triggerFileInput={triggerFileInput}
             fileInputRef={fileInputRef}
           />
+        </div>
+
+        <div>
+          {/* Right Sidebar */}
+          <div className="bg-white shadow-md rounded-lg p-6">
+            <h2 className="text-xl font-semibold mb-4">Achievements</h2>
+            <div className="flex justify-between items-center gap-6">
+
+              {/* Follow Master */}
+              <div className="flex flex-col items-center">
+                <img
+                  src={
+                    user?.followers?.length >= 10
+                      ? Follow3
+                      : user?.followers?.length >= 5
+                      ? Follow2
+                      : Follow1
+                  }
+                  alt="Follow Master"
+                  className="w-16 h-16 rounded-full mb-2"
+                />
+                <span className="text-sm font-medium text-gray-700">Follow Master</span>
+              </div>
+
+              {/* Following Master */}
+              <div className="flex flex-col items-center">
+                <img
+                  src={user?.following?.length >= 5 ? Following2 : Following1}
+                  alt="Following Master"
+                  className="w-16 h-16 rounded-full mb-2"
+                />
+                <span className="text-sm font-medium text-gray-700">Following Master</span>
+              </div>
+
+              {/* Posts Master (static for now) */}
+              <div className="flex flex-col items-center">
+                <img src={Post1} alt="Posts Master" className="w-16 h-16 rounded-full mb-2" />
+                <span className="text-sm font-medium text-gray-700">Posts Master</span>
+              </div>
+
+            </div>
+          </div>
+
+
         </div>
       </div>
 
