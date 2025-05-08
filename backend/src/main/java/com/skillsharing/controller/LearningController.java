@@ -21,7 +21,7 @@ import com.skillsharing.service.LearningService;;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/api/learning")
+@RequestMapping("/learning")
 public class LearningController {
 
     @Autowired
@@ -51,7 +51,7 @@ public class LearningController {
     public ResponseEntity<Learning> getLearningById(@PathVariable String id) {
         Optional<Learning> learning = learningService.getLearningById(id);
         return learning.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                      .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Update a learning post
