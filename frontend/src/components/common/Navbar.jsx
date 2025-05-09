@@ -259,22 +259,29 @@ const Navbar = ({ user }) => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="relative ml-3">
-              <div>
-                <button 
-                  className="flex text-sm focus:outline-none"
-                  onClick={() => navigate('/profile')}
-                  title="Profile"
-                >
-                  <img 
-                    className="h-8 w-8 rounded-full object-cover border-2 border-white"
-                    src={user?.profilePicture || DefaultAvatar} 
-                    alt={user?.username || 'User'}
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
+  <div className="flex items-center space-x-3 ml-3">
+    <button 
+      className="flex text-sm focus:outline-none"
+      onClick={() => navigate('/LearningPlan')}
+      title="Learning Plan"
+    >
+      <span className="text-gray-700">Learning Plan</span>
+    </button>
+
+    <button 
+      className="flex text-sm focus:outline-none"
+      onClick={() => navigate('/profile')}
+      title="Profile"
+    >
+      <img 
+        className="h-8 w-8 rounded-full object-cover border-2 border-white"
+        src={user?.profilePicture || DefaultAvatar} 
+        alt={user?.username || 'User'}
+      />
+    </button>
+  </div>
+</div>
+
         </div>
       </div>
     </nav>
