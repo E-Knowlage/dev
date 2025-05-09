@@ -54,7 +54,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar user={user} />
-
+        
       <Footer />
     </div>
   );
